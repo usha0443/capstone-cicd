@@ -1,0 +1,1 @@
+Push code → CI pipeline runs → Tests pass → App deployed → Health check success
