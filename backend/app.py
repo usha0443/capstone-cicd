@@ -1,38 +1,52 @@
 from flask import Flask, jsonify
 import psycopg2
 import os
+import time
 
 app = Flask(__name__)
 
-DB_HOST = os.getenv("DB_HOST", "db")
-DB_NAME = os.getenv("DB_NAME", "appdb")
-DB_USER = os.getenv("DB_USER", "appuser")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "password")
+# ---------------- DATABASE CHECK ----------------
+def check_database():
+    try:
+        conn = psycopg2.connect(
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            connect_timeout=2
+        )
+        conn.close()
+        return True
+    except Exception:
+        return False
 
-def get_db_connection():
-    return psycopg2.connect(
-        host=DB_HOST,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD
-    )
 
+# ---------------- HEALTH ENDPOINT ----------------
 @app.route("/health")
 def health():
-    return jsonify(status="UP"), 200
+    start_time = time.time()
 
-@app.route("/users")
-def users():
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id, name FROM users;")
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
-        return jsonify(rows), 200
-    except Exception as e:
-        return jsonify(error=str(e)), 500
+    api_status = "Healthy"
+    db_status = "Healthy" if check_database() else "Unhealthy"
 
+    total_time = round(time.time() - start_time, 2)
+
+    return jsonify({
+        "status": "Healthy" if api_status == "Healthy" and db_status == "Healthy" else "Unhealthy",
+        "totalDuration": f"0:00:{total_time}",
+        "entries": {
+            "apiHealthCheck": {
+                "description": "The API is healthy",
+                "status": api_status
+            },
+            "dbHealthCheck": {
+                "description": "The database is up and running" if db_status == "Healthy" else "Database connection failed",
+                "status": db_status
+            }
+        }
+    })
+
+
+# ---------------- MAIN ----------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=False)

@@ -1,3 +1,9 @@
-To deploy the application:
-docker-compose up -d
-Run healthcheck.sh to verify deployment.
+Deployment Runbook:
+
+Prerequisites:
+- Docker and Docker Compose installed
+- Docker Hub access
+
+Local Deployment:
+```bash
+docker compose up --build -d
