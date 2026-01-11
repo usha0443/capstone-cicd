@@ -1,9 +1,16 @@
 from flask import Flask, jsonify
 import psycopg2
 import os
-import time
 
 app = Flask(__name__)
+
+# ---------------- ROOT (OPTIONAL, FOR BROWSER) ----------------
+@app.route("/")
+def home():
+    return jsonify({
+        "message": "Backend is running"
+    }), 200
+
 
 # ---------------- DATABASE CHECK ----------------
 def check_database():
@@ -21,30 +28,26 @@ def check_database():
         return False
 
 
-# ---------------- HEALTH ENDPOINT ----------------
+# ---------------- APP HEALTH (FOR CI / TESTS) ----------------
 @app.route("/health")
 def health():
-    start_time = time.time()
+    # ONLY check app is running
+    return jsonify({"status": "UP"}), 200
 
-    api_status = "Healthy"
-    db_status = "Healthy" if check_database() else "Unhealthy"
 
-    total_time = round(time.time() - start_time, 2)
-
-    return jsonify({
-        "status": "Healthy" if api_status == "Healthy" and db_status == "Healthy" else "Unhealthy",
-        "totalDuration": f"0:00:{total_time}",
-        "entries": {
-            "apiHealthCheck": {
-                "description": "The API is healthy",
-                "status": api_status
-            },
-            "dbHealthCheck": {
-                "description": "The database is up and running" if db_status == "Healthy" else "Database connection failed",
-                "status": db_status
-            }
-        }
-    })
+# ---------------- DATABASE HEALTH ----------------
+@app.route("/health/db")
+def db_health():
+    if check_database():
+        return jsonify({
+            "status": "UP",
+            "description": "Database connection successful"
+        }), 200
+    else:
+        return jsonify({
+            "status": "DOWN",
+            "description": "Database connection failed"
+        }), 500
 
 
 # ---------------- MAIN ----------------
