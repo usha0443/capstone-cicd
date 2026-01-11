@@ -28,3 +28,28 @@ CI/CD Pipeline Proof:
 [GitHub Actions Success](images/github-actions-success.png)
 [Pipeline Logs](images/pipeline-logs.png)
 [Docker Hub Image](images/dockerhub-image.png)
+
+Pipeline Flow diagram:
+
+Developer
+   |
+   v
+GitHub Repository
+   |
+   v
+GitHub Actions (CI)
+   |
+   +--> Run Unit Tests (pytest)
+   |
+   +--> Build Docker Images
+   |
+   +--> Push Images
+   |
+   v
+Deployment Server (local)
+   |
+   v
+docker-compose up -d
+   |
+   v
+Application Live 

@@ -21,3 +21,28 @@ Architecture Diagram:
 
 [Project Structure](images/project-structure.png)
 [Running Containers](images/docker-ps.png)
+
+User (Browser)
+      |
+      v
+Frontend (HTML + CSS + JS)
+      |
+      v
+Backend API (Flask)
+      |
+      v
+PostgreSQL Database
+
+Containerized view:
+
+Browser
+  |
+  v
+Frontend Container (Docker)
+  |
+  v
+Backend Container (Flask + Docker)
+  |
+  v
+PostgreSQL Container
+
